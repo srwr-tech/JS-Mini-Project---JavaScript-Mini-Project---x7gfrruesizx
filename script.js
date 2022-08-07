@@ -1,86 +1,91 @@
-let searchBtn = document.querySelector('#search-btn');
-let searchBar = document.querySelector('.search-bar-container');
-let formBtn = document.querySelector('#login-btn');
-let loginForm = document.querySelector('.login-form-container');
-let formClose = document.querySelector('#form-close');
-let menu = document.querySelector('#menu-bar');
-let navbar = document.querySelector('.navbar');
-let videoBtn = document.querySelectorAll('.vid-btn');
+// api.openweathermap.org/data/2.5/weather?q={city name}&appid={your api key}
 
-window.onscroll = () =>{
-    searchBtn.classList.remove('fa-times');
-    searchBar.classList.remove('active');
-    menu.classList.remove('fa-times');
-    navbar.classList.remove('active');
-    loginForm.classList.remove('active');
+const weatherApi = {
+    key: "bab281d79e5f1e9755a68d754cc313e7",
+    baseUrl: "https://api.openweathermap.org/data/2.5/weather",
 }
 
-menu.addEventListener('click', () =>{
-    menu.classList.toggle('fa-times');
-    navbar.classList.toggle('active');
+const searchInputBox = document.getElementById('input-box');
+
+// Event Listener Function on keypress
+searchInputBox.addEventListener('keypress', (event) => {
+
+    if (event.keyCode == 13) {
+        console.log(searchInputBox.value);
+        getWeatherReport(searchInputBox.value);
+        document.querySelector('.weather-body').style.display = "block";
+    }
+
 });
 
-searchBtn.addEventListener('click', () =>{
-    searchBtn.classList.toggle('fa-times');
-    searchBar.classList.toggle('active');
-});
+// Get Weather Report
+function getWeatherReport(city) {
+    fetch(`${weatherApi.baseUrl}?q=${city}&appid=${weatherApi.key}&units=metric`)
+        .then(weather => {
+            return weather.json();
+        }).then(showWeatherReport);
+}
 
-formBtn.addEventListener('click', () =>{
-    loginForm.classList.add('active');
-});
+// Show Weather Report
+function showWeatherReport(weather) {
+    console.log(weather);
 
-formClose.addEventListener('click', () =>{
-    loginForm.classList.remove('active');
-});
+    let city = document.getElementById('city');
+    city.innerText = `${weather.name}, ${weather.sys.country}`;
 
-videoBtn.forEach(btn =>{
-    btn.addEventListener('click', ()=>{
-        document.querySelector('.controls .active').classList.remove('active');
-        btn.classList.add('active');
-        let src = btn.getAttribute('data-src');
-        document.querySelector('#video-slider').src = src;
-    });
-});
+    let temperature = document.getElementById('temp');
+    temperature.innerHTML = `${Math.round(weather.main.temp)}&deg;C`;
 
-var swiper = new Swiper(".review-slider", {
-    spaceBetween: 20,
-    loop:true,
-    autoplay: {
-        delay: 2500,
-        disableOnInteraction: false,
-    },
-    breakpoints: {
-        640: {
-          slidesPerView: 1,
-        },
-        768: {
-          slidesPerView: 2,
-        },
-        1024: {
-          slidesPerView: 3,
-        },
-    },
-});
+    let minMaxTemp = document.getElementById('min-max');
+    minMaxTemp.innerHTML = `${Math.floor(weather.main.temp_min)}&deg;C (min)/ ${Math.ceil(weather.main.temp_max)}&deg;C (max) `;
 
-var swiper = new Swiper(".brand-slider", {
-    spaceBetween: 20,
-    loop:true,
-    autoplay: {
-        delay: 2500,
-        disableOnInteraction: false,
-    },
-    breakpoints: {
-        450: {
-          slidesPerView: 2,
-        },
-        768: {
-          slidesPerView: 3,
-        },
-        991: {
-          slidesPerView: 4,
-        },
-        1200: {
-          slidesPerView: 5,
-        },
-      },
-});
+    let weatherType = document.getElementById('weather');
+    weatherType.innerText = `${weather.weather[0].main}`;
+
+    let date = document.getElementById('date');
+    let todayDate = new Date();
+    date.innerText = dateManage(todayDate);
+
+
+    if (weatherType.textContent == 'Clear') {
+        document.body.style.backgroundImage = "url('image/clear.jpeg')";
+
+    } else if (weatherType.textContent == 'Clouds') {
+
+        document.body.style.backgroundImage = "url('image/cloud.jpeg')";
+
+    } else if (weatherType.textContent == 'Haze') {
+
+        document.body.style.backgroundImage = "url('image/haze.jpeg')";
+
+    } else if (weatherType.textContent == 'Rain') {
+
+        document.body.style.backgroundImage = "url('image/rain.jpeg')";
+
+    } else if (weatherType.textContent == 'Snow') {
+
+        document.body.style.backgroundImage = "url('image/snow.jpeg')";
+
+    } else if (weatherType.textContent == 'Thunderstorm') {
+
+        document.body.style.backgroundImage = "url('image/thunderstrom.jpeg')";
+
+    }
+}
+
+// Date manage
+function dateManage(dateArg) {
+
+    let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+    let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    let year = dateArg.getFullYear();
+    let month = months[dateArg.getMonth()];
+    let date = dateArg.getDate();
+    let day = days[dateArg.getDay()];
+
+    return `${date} ${month} (${day}), ${year}`;
+}
+
+
